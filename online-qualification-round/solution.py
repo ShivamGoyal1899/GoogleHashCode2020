@@ -1,133 +1,82 @@
-# More Pizza
-# Solution for the Practice Round of Google Hash Code 2020
-# https://github.com/ShivamGoyal1899/GoogleHashCode2020
+import random
+
+def scoresSorter(val):
+    return val[1]
+
+def libSorter(val):
+    N = int(val[0][0])
+    T = int(val[0][1])
+    M = int(val[0][2])
+
+    fitness = N * M / T
+
+    return fitness
+
+def readFile(filename):
+    fp = open(filename)
+    line = fp.readline().rstrip().split(' ')
+    B = int(line[0])
+    L = int(line[1])
+    D = int(line[2])
+    scores = fp.readline().rstrip().split(' ')
+    scores = list(map(int, scores))
+
+    libraries = []
+    for i in range(0,L):
+        lib = fp.readline().rstrip().split(' ')
+        lib.append(i)
+        books = fp.readline().rstrip().split(' ')
+        books = list(map(int, books))
+        
+        booksScore = []
+        for j in range(0, len(books)):
+            booksScore.append([books[j], scores[books[j]]])
+
+        booksScore.sort(key = scoresSorter, reverse = True )
+
+        libraries.append([lib, booksScore])
+
+    libraries.sort(key = libSorter, reverse = True)
+
+    fp.close()
+    return B, L, D, scores, libraries
+
+def writeFile(filename, result):
+    fout = filename[:-3] + '.out'
+    fp = open(fout, "w")
+
+    fp.write(str(len(result)) + '\n')
+
+    for i in range(0, len(result)):
+        fp.write(' '.join(map(str,result[i][0])) + '\n')
+        fp.write(' '.join(map(str,result[i][1])) + '\n')
+
+    fp.close()
+
+def solve(B, L, D, scores, libraries):
+    result = []
+
+    for i in range(0, L):
+        booksInLib = int(libraries[i][0][0])
+        libID = [libraries[i][0][3], booksInLib]
+        books = []
+        for j in range(0, booksInLib):
+            books.append(libraries[i][1][j][0])
+
+        result.append([libID, books])
+
+    return result
 
 
-def solve(MAX, inputList):
+def run(file):
+    B, L, D, scores, libraries = readFile("Input/"+file)
 
-    solutionIndexList = [] # To store the best solution indexes through out the solution generating
-    solutionValueList = [] # To store the best solution values through out the solution generating
-    currentIndexList = [] # To store the current solution indexes through out the solution generating
-    currentValueList = [] # To store the current solution values through out the solution generating
+    result = solve(B, L, D, scores, libraries)
 
-    fullSize = len(inputList)
+    writeFile("Output/" + file, result)
 
-    maxScore = 0 # Stores the maximum score achieved through out the solution generating
+files = 'a_example.in  b_read_on.in  c_incunabula.in  d_tough_choices.in  e_so_many_books.in  f_libraries_of_the_world.in'.split('  ')
 
-    startIndex = fullSize # Stores index which the solution generating should start from
-
-    sum = 0
-
-    # Solution generating starts from the last element of the inputList
-    # If first element of currentIndexList becomes 0 that means solution generating is finished
-
-    while((len(currentIndexList) > 0 and currentIndexList[0] != 0) or len(currentIndexList) == 0):
-
-        startIndex = startIndex - 1 
-
-        for i in range(startIndex, -1, -1): # Used to traverse from end to start of the inputList
-
-            currentValue = inputList[i]
-
-            tempSum = sum + currentValue 
-
-            if (tempSum == MAX):  # If the temporary sum is equal to target that means the perfect solution is found
-                sum = tempSum
-                currentIndexList.append(i) # Add current Pizza index to the solution
-                currentValueList.append(currentValue) # Add current Pizza value to the solution
-                break  # Go to return solution
-
-            elif (tempSum > MAX):  # If the temporary sum is greater than target
-                continue  # Try next value
-
-            elif (tempSum < MAX):  # If the temporary sum is lesser than target
-                sum = tempSum
-                currentIndexList.append(i) # Add current Pizza index to the solution
-                currentValueList.append(currentValue) # Add current Pizza value to the solution
-                continue  # Try next value
-
-        if (maxScore < sum):  # If currently generated solution has the best score
-            maxScore = sum  # Save its value
-
-            solutionIndexList = []
-            solutionValueList = []
-
-            for y in currentIndexList:
-                solutionIndexList.append(y)  # Save the currently best solution indexes
-            for y in currentValueList:
-                solutionValueList.append(y)  # Save the currently best solution values
-
-        if (maxScore == MAX):  # If current solution is the perfect solution
-            break # Stop solution generating
-
-        if(len(currentValueList) != 0):
-            lastVal = currentValueList.pop() # Remove the last element from current values
-            sum = sum - lastVal # Subtract it from sum
-
-        if(len(currentIndexList) != 0):
-            lastIndex = currentIndexList.pop() # Remove the last element from current indexes
-            startIndex = lastIndex # Make it as the starting index for the next iteration
-
-        if(len(currentIndexList) == 0 and (startIndex == 0)): # If solution generating is almost finished
-            break # Stop solution generating
-
-    print("SCORE = " + str(maxScore))     # Print the score of the best solution
-
-    return solutionIndexList  # Return indexes list of the best solution
-
-
-def process(fileName):
-
-    # Print data to console
-    print("")
-    print("-----------------------")
-    print(fileName)
-    print("-----------------------")
-
-    #  Read the open file by name
-    inputFile = open(inputFilesDirectory + fileName + ".in", "rt")
-
-    #  Read file
-    firstLine = inputFile.readline()
-    secondLine = inputFile.readline()
-    inputFile.close()
-
-
-    #  Print input data
-    print("INPUT")
-    print(firstLine)
-    print(secondLine)
-
-    #  Assign parameters
-    MAX, NUM = list(map(int, firstLine.split()))
-
-    #  Create the pizza list by reading the file
-    inputList = list(map(int, secondLine.split()))
-
-    outputList = solve(MAX, inputList)  # Solve the problem and get output
-
-    #  Print output data and create output file
-       
-    print("")
-    print("OUTPUT")
-    print(len(outputList))
-
-    outputString = ""
-    for l in outputList:
-        outputString = outputString + str(l) + " "
-    print(outputString)
-
-    outputFile = open(outputFilesDirectory + fileName + ".out", "w")
-    outputFile.write(str(len(outputList)) + "\n")
-    outputFile.write(outputString)
-    outputFile.close()
-
-
-inputFilesDirectory = "Input/"  # Location of input files
-outputFilesDirectory = "Output/"  # Location of output files
-
-fileNames = ["a_example", "b_small", "c_medium",
-             "d_quite_big", "e_also_big"]  # File names
-
-for fileName in fileNames:  # Take each and every file and solve
-    process(fileName)
+for f in files:
+    print(f)
+    run(f)
